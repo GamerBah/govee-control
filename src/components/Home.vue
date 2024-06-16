@@ -6,7 +6,7 @@
              elevation="7"
              color="secondary"
              rounded="lg"
-             @click="devices = []; getDevices()"
+             @click="$emit('refresh')"
              prepend-icon="mdi-refresh"
              :loading="refreshing">
         <b>Refresh</b>
@@ -32,7 +32,7 @@
                 <v-btn icon
                        variant="plain"
                        density="compact"
-                       @click.stop="powerSwitch(device)"
+                       @click.stop="$emit('powerSwitch', device)"
                        :color="connectionStatus(device) === -1 ? 'info' : isOn(device) ? 'green' : 'red'"
                        :loading="connectionStatus(device) === -1 || device.states[capabilities.POWER.instance].loading">
                   <v-icon>mdi-power</v-icon>
@@ -103,7 +103,7 @@
                 <v-col>
                   <v-row no-gutters>
                     <v-col class="px-2">
-                      <v-slider @end="setDeviceCapability(device, capabilities.BRIGHTNESS, device.states[capabilities.BRIGHTNESS.instance], brightnessSlider)"
+                      <v-slider @end="$emit('setDeviceCapability', device, capabilities.BRIGHTNESS, device.states[capabilities.BRIGHTNESS.instance], brightnessSlider)"
                                 style="min-width: 42px;"
                                 color="accent"
                                 v-model="brightnessSlider"
@@ -121,7 +121,7 @@
                       </v-slider>
                     </v-col>
                     <v-col class="px-2">
-                      <v-slider @end="setDeviceCapability(device, capabilities.COLOR_TEMP, device.states[capabilities.COLOR_TEMP.instance], kelvinSlider)"
+                      <v-slider @end="$emit('setDeviceCapability', device, capabilities.COLOR_TEMP, device.states[capabilities.COLOR_TEMP.instance], kelvinSlider)"
                                 style="min-width: 42px"
                                 v-model="kelvinSlider"
                                 :disabled="kelvinSlider < 2000 || blockStateChange"
@@ -151,7 +151,7 @@
                               color="secondary"
                               class="ma-1"
                               :disabled="blockStateChange"
-                              @click="setDeviceCapability(device, capabilities.DIY, diy, diy.value)">
+                              @click="$emit('setDeviceCapability', device, capabilities.DIY, diy, diy.value)">
                         <template v-slot:title>
                           <span class="mr-3 text-body-2">{{ diy.name }}</span>
                         </template>
@@ -208,31 +208,6 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="noKeySet" max-width="50rem">
-        <v-card rounded="xl"
-                title="Uh oh!"
-                subtitle="No Govee API Key"
-                color="background">
-          <template v-slot:append>
-            <v-btn color="red" variant="text" icon @click="noKeySet = false;">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </template>
-          <v-card-text>
-            <v-container>
-              <span>It looks like you don't have an API key set! Click settings in the top right corner to set a key.</span>
-            </v-container>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <v-snackbar v-model="storageSuccess" :timeout="4000" color="success" variant="elevated">
-        Retrieved devices from local storage!
-      </v-snackbar>
-
-      <v-snackbar v-model="apiSuccess" :timeout="4000" color="success" variant="elevated">
-        Retrieved devices from Govee API!
-      </v-snackbar>
     </div>
   </v-container>
 </template>
@@ -318,27 +293,25 @@ function storageAvailable(type) {
 
 export default {
   components: {IconCommunity},
+  props: {
+    devices: Array,
+    refreshing: Boolean,
+    currentTime: dayjs,
+    lastRefresh: dayjs,
+    blockStateChange: Boolean,
+  },
   data() {
     return {
       apiKey: "apiKey",
       typedKey: "",
-      devices: [],
       presetDialog: false,
       selected: null,
       capability: null,
       skeletons: 0,
       json: "",
       jsonDialog: false,
-      storageSuccess: false,
-      apiSuccess: false,
-      worker: null,
-      lastRefresh: null,
-      currentTime: dayjs(),
-      refreshing: false,
-      noKeySet: false,
       brightnessSlider: 100,
       kelvinSlider: 2000,
-      blockStateChange: false,
       capabilities: {
         POWER: Capability.POWER,
         BRIGHTNESS: Capability.BRIGHTNESS,
@@ -347,43 +320,6 @@ export default {
         SCENE: Capability.SCENE,
       },
     };
-  },
-  async created() {
-    this.myWorker = new Worker("requestsWorker.js");
-    this.myWorker.addEventListener("message", this.handleWorkerResponse);
-
-    if (storageAvailable("localStorage")) {
-      let storage = localStorage.getItem("devices");
-      this.apiKey = localStorage.getItem("apiKey");
-      this.lastRefresh = dayjs(localStorage.getItem("lastRefresh")) ?? dayjs();
-      if (storage !== undefined && storage !== null && storage !== "[]") {
-        this.devices = JSON.parse(localStorage.getItem("devices"));
-        for (const value of this.devices) {
-          value.states[DeviceState.ONLINE] = null;
-          this.setDeviceStates(this.apiKey, value);
-        }
-        this.devices.sort((a, b) => {
-          return a.sku.localeCompare(b.sku) || a.deviceName.localeCompare(b.deviceName);
-        });
-        this.storageSuccess = true;
-      } else {
-        if (this.apiKey !== null) {
-          console.log(this.apiKey)
-          await this.getDevices().then(() => this.apiSuccess = true);
-        } else {
-          this.noKeySet = true;
-        }
-      }
-    } else {
-      this.apiKey = this.getCookie("Govee-API-Key");
-      if (this.apiKey !== null || this.apiKey !== "") {
-        await this.getDevices();
-      } else {
-        this.noKeySet = true;
-      }
-    }
-
-    let timeUpdate = setInterval(() => this.currentTime = dayjs(), 60000);
   },
   methods: {
     selectDevice(device) {
@@ -404,9 +340,6 @@ export default {
         default:
           return -1;
       }
-    },
-    isOn(device) {
-      return device.states[DeviceState.POWER].value !== 0;
     },
     connectionColor(device) {
       switch (device.states[DeviceState.ONLINE].value) {
@@ -432,185 +365,11 @@ export default {
     brightness(device) {
       return device.states[DeviceState.BRIGHTNESS].value ?? 0;
     },
-    async powerSwitch(device) {
-      device.states[DeviceState.POWER].loading = true;
-      const response = await this.httpRequest(this.apiKey, "https://openapi.api.govee.com/router/api/v1/device/control",
-          Http.POST, this.generateJSON(device, Capability.POWER, this.isOn(device) ? 0 : 1));
-
-      if (response.data.code === 200) {
-        device.states[DeviceState.POWER].value = response.data.capability.value;
-        device.states[DeviceState.POWER].loading = false;
-      }
+    isOn(device) {
+      return device.states[DeviceState.POWER].value !== 0;
     },
     timeSinceRefresh() {
       return dayjs(this.currentTime).to(this.lastRefresh);
-    },
-    transformItemToDevice(item) {
-      return {
-        sku: item.sku,
-        addr: item.device,
-        deviceName: item.deviceName,
-        type: item.type,
-        capabilities: item.capabilities,
-        diy: [],
-        states: [],
-        dialogMenu: false,
-      };
-    },
-    async postDeviceIfHasDiy(deviceObj) {
-      if (this.deviceHasDiy(deviceObj.capabilities)) {
-        const obj = {
-          php: "https://gamerbah.com/govee/api/request.php",
-          apiKey: this.apiKey,
-          deviceObj: deviceObj,
-          url: "https://openapi.api.govee.com/router/api/v1/device/diy-scenes"
-        };
-
-        // Wrap the postMessage call in a new Promise, resolve when the worker sends back the result, reject on error
-        return new Promise((resolve, reject) => {
-          // handle message event
-          this.myWorker.onmessage = async (e) => {
-            const diyData = e.data.response;
-            deviceObj.diy = diyData.payload.capabilities[0].parameters.options;
-            deviceObj.diy.sort((a, b) => a.name.localeCompare(b.name));
-            deviceObj.diy.forEach(obj => obj["loading"] = false);
-            deviceObj.states = await this.getDeviceStates(this.apiKey, deviceObj);
-            resolve(deviceObj);   // resolve the promise with the updated deviceObj
-          };
-
-          // handle error event
-          this.myWorker.onerror = (err) => {
-            console.log("Worker error: ", err);
-            reject(err);
-          };
-
-          this.myWorker.postMessage(JSON.stringify(obj));
-        });
-      }
-
-      // if a device doesn't have DIY capability, return it as is
-      return deviceObj;
-    },
-    async getDevices() {
-      this.refreshing = true;
-      try {
-        const response = await this.httpRequest(this.apiKey, "https://openapi.api.govee.com/router/api/v1/user/devices", Http.GET, {});
-        const data = response.data;
-        this.skeletons = data.data.length;
-
-        const devicePromises = data.data.map(item => {
-          return new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              reject("Promise timed out.");
-            }, 5000); // Set your desired timeout value.
-
-            Promise.resolve(this.transformItemToDevice(item))
-                .then((deviceObj) => this.postDeviceIfHasDiy(deviceObj))
-                .then((result) => {
-                  clearTimeout(timeout);
-                  resolve(result);
-                })
-                .catch((error) => {
-                  clearTimeout(timeout);
-                  reject(error);
-                });
-          });
-        });
-
-        this.devices = await Promise.all(devicePromises);
-        this.devices.sort((a, b) => a.sku.localeCompare(b.sku));
-      } catch (error) {
-        console.log("Error:", error);
-      } finally {
-        this.refreshing = false;
-        this.lastRefresh = dayjs();
-        this.currentTime = dayjs();
-        localStorage.setItem("lastRefresh", this.lastRefresh);
-      }
-    },
-    async handleWorkerResponse(e) {
-      const diyData = e.data.response;
-      const deviceObj = e.data.deviceObj;
-
-      deviceObj.diy = diyData.payload.capabilities[0].parameters.options;
-      deviceObj.diy.sort((a, b) => a.name.localeCompare(b.name));
-      deviceObj.diy.forEach(obj => obj["loading"] = false);
-
-      deviceObj.states = await this.getDeviceStates(this.apiKey, deviceObj);
-
-      this.devices.push(deviceObj);
-      localStorage.setItem("devices", JSON.stringify(this.devices.sort((a, b) => {
-        return a.sku.localeCompare(b.sku) || a.deviceName.localeCompare(b.deviceName);
-      })));
-    },
-    async getDeviceStates(apiKey, device) {
-      const response = await this.httpRequest(apiKey, "https://openapi.api.govee.com/router/api/v1/device/state", Http.POST, {
-        requestId: "uuid",
-        payload: {
-          sku: device.sku,
-          device: device.addr,
-        },
-      });
-
-      const data = response.data;
-      const capabilities = data.payload.capabilities;
-
-      const deviceStates = {};
-      for (const capability of capabilities) {
-        if (Object.values(DeviceState).includes(capability.instance)) {
-          deviceStates[capability.instance] = {value: capability.state.value, loading: false};
-        }
-      }
-      return deviceStates;
-    },
-    async setDeviceStates(apiKey, device) {
-      const response = await this.httpRequest(apiKey, "https://openapi.api.govee.com/router/api/v1/device/state", Http.POST, {
-        requestId: "uuid",
-        payload: {
-          sku: device.sku,
-          device: device.addr,
-        },
-      });
-      const data = response.data;
-      const capabilities = data.payload.capabilities;
-
-      const deviceStates = {};
-      for (const capability of capabilities) {
-        if (Object.values(DeviceState).includes(capability.instance)) {
-          deviceStates[capability.instance] = {value: capability.state.value, loading: false};
-        }
-      }
-      device.states = deviceStates;
-    },
-    async setDeviceCapability(device, capability, instance, value) {
-      instance.loading = true;
-      this.blockStateChange = true;
-      let response = await this.httpRequest(this.apiKey, "https://openapi.api.govee.com/router/api/v1/device/control", Http.POST, this.generateJSON(device, capability, value));
-
-      if (response.data.code === 200) {
-        instance.value = value;
-        instance.loading = false;
-        this.blockStateChange = false;
-      }
-    },
-    async httpRequest(apiKey, url, method, data) {
-      return axios({
-        url: "https://gamerbah.com/govee/api/request.php",
-        method: method,
-        params: {"api_key": apiKey, "api_url": url},
-        headers: {"Content-Type": "application/json"},
-        data: data,
-      });
-    },
-    getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(";").shift();
-    },
-    deviceHasDiy(capabilities) {
-      if (capabilities !== null) {
-        return capabilities.some(capability => capability.instance === "diyScene");
-      }
     },
     generateJSON(device, capability, value) {
       const json = {
@@ -640,7 +399,7 @@ export default {
       this.json = syntaxHighlight(this.generateJSON(device, capability, value));
       this.jsonDialog = true;
     }
-  },
+  }
 };
 
 const DeviceState = Object.freeze({
