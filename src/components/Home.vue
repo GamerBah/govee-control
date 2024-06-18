@@ -26,7 +26,7 @@
                     :disabled="connectionStatus(device) === 0">
               <template v-slot:title>
                 <span class="mr-3">{{ device.deviceName }}</span>
-                <span id="sku" class="flex-grow-1 text-grey">{{ device.sku }}</span>
+                <span v-if="showAdvancedInfo" id="sku" class="flex-grow-1 text-grey">{{ device.sku }}</span>
               </template>
               <template v-slot:append>
                 <v-btn icon
@@ -84,7 +84,7 @@
         <v-card rounded="xl" color="background">
           <template v-slot:title>
             <span class="mr-3">{{ device.deviceName }}</span>
-            <span id="sku" class="text-grey">{{ device.sku }}</span>
+            <span v-if="showAdvancedInfo" id="sku" class="text-grey">{{ device.sku }}</span>
             <span class="pl-5 flex-grow-1">
               <v-icon color="green" size="x-small">mdi-wifi</v-icon>
               <span class="ml-2 text-green text-body-1">Connected</span>
@@ -299,6 +299,7 @@ export default {
     currentTime: dayjs,
     lastRefresh: dayjs,
     blockStateChange: Boolean,
+    showAdvancedInfo: Boolean,
   },
   data() {
     return {

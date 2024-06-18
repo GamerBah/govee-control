@@ -18,6 +18,7 @@ const showKey = ref(false);
 const snack = ref(false);
 const snackText = ref("");
 const displayCallLimit = ref(false);
+const showAdvancedInfo = ref(false);
 const tab = ref("");
 const worker = ref(null);
 
@@ -404,10 +405,11 @@ function getCookie(name) {
                   :refreshing="refreshing"
                   :current-time="currentTime"
                   :last-refresh="lastRefresh"
-                  :block-state-change="blockStateChange" />
+                  :block-state-change="blockStateChange"
+                  :show-advanced-info="showAdvancedInfo" />
           </v-tabs-window-item>
           <v-tabs-window-item key="presets" value="presets">
-            <Presets/>
+            <Presets :devices="devices" :show-advanced-info="showAdvancedInfo" />
           </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
@@ -479,6 +481,14 @@ function getCookie(name) {
               </v-col>
               <v-col cols="3">
                 <v-switch hide-details v-model="displayCallLimit" color="accent"></v-switch>
+              </v-col>
+            </v-row>
+            <v-row class="d-flex align-center">
+              <v-col cols="3">
+                <span>Advanced Device Info</span>
+              </v-col>
+              <v-col cols="3">
+                <v-switch hide-details v-model="showAdvancedInfo" color="accent"></v-switch>
               </v-col>
             </v-row>
           </v-container>
