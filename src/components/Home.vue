@@ -264,33 +264,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-function storageAvailable(type) {
-  let storage;
-  try {
-    storage = window[type];
-    const x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return (
-        e instanceof DOMException &&
-        // everything except Firefox
-        (e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === "QuotaExceededError" ||
-            // Firefox
-            e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-        // acknowledge QuotaExceededError only if there's something already stored
-        storage &&
-        storage.length !== 0
-    );
-  }
-}
-
 export default {
   components: {IconCommunity},
   props: {
@@ -301,6 +274,7 @@ export default {
     blockStateChange: Boolean,
     showAdvancedInfo: Boolean,
   },
+  emits: ["savePreset"],
   data() {
     return {
       apiKey: "apiKey",
@@ -416,11 +390,6 @@ const Capability = Object.freeze({
   COLOR_TEMP: {type: "devices.capabilities.color_setting", instance: "colorTemperatureK"},
   DIY: {type: "devices.capabilities.dynamic_scene", instance: "diyScene"},
   SCENE: {type: "devices.capabilities.dynamic_scene", instance: "lightScene"},
-});
-
-const Http = Object.freeze({
-  GET: "GET",
-  POST: "POST",
 });
 
 function syntaxHighlight(json) {

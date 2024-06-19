@@ -29,8 +29,9 @@ const currentTime = ref(dayjs());
 const blockStateChange = ref(false);
 const storageSuccess = ref(false);
 const apiSuccess = ref(false);
+const presets = ref([]);
 
-const emit = defineEmits(["refresh", "setDeviceCapability", "powerSwitch"]);
+const emit = defineEmits(["refresh", "setDeviceCapability", "powerSwitch", "savePreset", "deletePreset", "updatePreset"]);
 
 const Http = Object.freeze({
   GET: "GET",
@@ -116,10 +117,12 @@ onMounted(() => {
   worker.value.addEventListener("message", handleWorkerResponse);
 
   if (storageAvailable("localStorage")) {
-    let storage = localStorage.getItem("devices");
     apiKey.value = localStorage.getItem("apiKey");
     lastRefresh.value = dayjs(localStorage.getItem("lastRefresh")) ?? dayjs();
-    if (storage !== undefined && storage !== null && storage !== "[]") {
+    presets.value = JSON.parse(localStorage.getItem("presets")) ?? [];
+
+    let deviceStorage = localStorage.getItem("devices");
+    if (deviceStorage !== undefined && deviceStorage !== null && deviceStorage !== "[]") {
       devices.value = JSON.parse(localStorage.getItem("devices"));
       for (const value of devices.value) {
         value.states[DeviceState.ONLINE] = null;
@@ -358,6 +361,27 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
+function savePreset(obj) {
+  presets.value.push(obj);
+  presets.value.sort((a, b) => {
+    return a.name.localeCompare(b.name) || a.actions > b.actions;
+  });
+  localStorage.setItem("presets", JSON.stringify(presets.value));
+}
+
+function deletePreset(index) {
+  presets.value.splice(index, 1);
+  localStorage.setItem("presets", JSON.stringify(presets.value));
+}
+
+function updatePreset(index, preset) {
+  presets.value[index] = preset;
+  presets.value.sort((a, b) => {
+    return a.name.localeCompare(b.name) || a.actions > b.actions;
+  });
+  localStorage.setItem("presets", JSON.stringify(presets.value));
+}
+
 </script>
 
 <template>
@@ -405,11 +429,15 @@ function getCookie(name) {
                   :refreshing="refreshing"
                   :current-time="currentTime"
                   :last-refresh="lastRefresh"
-                  :block-state-change="blockStateChange"
-                  :show-advanced-info="showAdvancedInfo" />
+                  :block-state-change="blockStateChange" :show-advanced-info="showAdvancedInfo"/>
           </v-tabs-window-item>
           <v-tabs-window-item key="presets" value="presets">
-            <Presets :devices="devices" :show-advanced-info="showAdvancedInfo" />
+            <Presets @save-preset="savePreset"
+                     @delete-preset="deletePreset"
+                     @update-preset="updatePreset"
+                     :devices="devices"
+                     :presets="presets"
+                     :show-advanced-info="showAdvancedInfo"/>
           </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
@@ -497,10 +525,7 @@ function getCookie(name) {
     </v-dialog>
 
     <v-dialog v-model="noKey" max-width="50rem">
-      <v-card rounded="xl"
-              title="Uh oh!"
-              subtitle="No Govee API Key"
-              color="background">
+      <v-card rounded="xl" title="Uh oh!" subtitle="No Govee API Key" color="background">
         <template v-slot:append>
           <v-btn color="red" variant="text" icon @click="noKey = false;">
             <v-icon>mdi-close</v-icon>
