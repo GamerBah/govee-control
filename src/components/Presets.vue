@@ -3,8 +3,7 @@
     <div class="d-flex align-baseline">
       <v-btn class="mb-5"
              variant="elevated"
-             elevation="7"
-             block @click="openPresetDialog(true)"
+             elevation="7" block @click="openPresetDialog(true)"
              size="large"
              color="secondary"
              rounded="lg"
@@ -37,7 +36,7 @@
               </template>
 
               <v-card-text>
-                <span class="mr-3">{{ preset.actions }} actions</span>
+                <span class="mr-3">{{ preset.actions + (preset.actions === 1 ? " action" : " actions") }}</span>
               </v-card-text>
 
             </v-card>
@@ -52,7 +51,32 @@
     </div>
 
     <v-dialog persistent v-model="dialogPreset" max-width="60rem">
-      <v-card rounded="xl" :title="presetCardTitle" color="background">
+      <v-card rounded="xl" color="background">
+        <template v-slot:title>
+          <v-row class="d-flex align-center">
+            <v-col cols="5">
+              <span>{{ presetCardTitle }}</span>
+            </v-col>
+            <v-col cols="3">
+              <v-btn @click="generateJSON(currentPreset)"
+                     prepend-icon="mdi-content-copy"
+                     variant="plain"
+                     color="white"
+                     rounded="lg">
+                Copy JSON
+              </v-btn>
+            </v-col>
+            <v-col cols="3">
+              <v-btn @click="openJsonDialog(currentPreset)"
+                     prepend-icon="mdi-eye"
+                     variant="plain"
+                     color="white"
+                     rounded="lg">
+                View JSON
+              </v-btn>
+            </v-col>
+          </v-row>
+        </template>
         <template v-slot:append v-if="!newPreset">
           <v-btn @click="dialogDelete = true" variant="plain" density="default" color="red" icon>
             <v-icon>mdi-trash-can</v-icon>
@@ -69,7 +93,7 @@
                               placeholder="New Preset"
                               persistent-placeholder
                               variant="solo-filled"
-                              color="accent"
+                              color="accent" validate-on="input" :rules="[nameRules.unique, nameRules.required]"
                               v-model="currentPreset.name"></v-text-field>
               </v-col>
             </v-row>
@@ -89,8 +113,7 @@
                               color="accent"
                               :item-value="'value'"
                               :items="device.diy"
-                              v-model="currentPreset.diy[device.deviceName]"
-                              @click:clear="removeDiySelection(device, )"
+                              v-model="currentPreset.diy[device.deviceName]" @click:clear="removeDiySelection(device)"
                               @update:modelValue="updateSelectData(device, currentPreset.diy[device.deviceName])">
                       <template v-slot:item="{ props, item }">
                         <v-list-item v-if="showAdvancedInfo"
@@ -100,36 +123,38 @@
                         <v-list-item v-else v-bind="props" :title="passName(item)"></v-list-item>
                       </template>
                       <template v-slot:selection="{ item, index }">
-                        <span>{{ diyValues[item.value] }}</span>
+                        <span>{{ diyValues[item.value] ?? currentPreset.diy[device.deviceName].name }}</span>
                       </template>
                     </v-select>
                   </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>
-            <v-card-actions>
-              <v-spacer/>
-              <v-btn @click="resetPresetDialog"
-                     block
-                     prepend-icon="mdi-cancel"
-                     variant="elevated"
-                     color="secondary"
-                     min-width="15%"
-                     min-height="50px"
-                     rounded="lg">Cancel
-              </v-btn>
-              <v-spacer/>
-              <v-btn @click="saveOrUpdatePreset"
-                     block
-                     prepend-icon="mdi-floppy"
-                     variant="elevated"
-                     color="green"
-                     min-width="15%"
-                     min-height="50px"
-                     rounded="lg"
-                     :disabled="!validatePreset">Save
-              </v-btn>
-              <v-spacer/>
+            <v-card-actions class="mt-10">
+              <v-row class="d-flex align-center text-center" no-gutters>
+                <v-col>
+                  <v-btn @click="resetPresetDialog"
+                         block
+                         prepend-icon="mdi-cancel"
+                         variant="elevated"
+                         color="secondary"
+                         size="large"
+                         rounded="lg">Cancel
+                  </v-btn>
+                </v-col>
+                <v-spacer/>
+                <v-col>
+                  <v-btn @click="saveOrUpdatePreset"
+                         block
+                         prepend-icon="mdi-floppy"
+                         variant="elevated"
+                         color="green"
+                         rounded="lg"
+                         size="large"
+                         :disabled="!validatePreset">Save
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-card-actions>
           </v-container>
         </v-card-text>
@@ -158,6 +183,31 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="dialogJson" max-width="50rem" max-height="75vh" scrollable>
+      <v-card rounded="xl" :title="currentPreset.name" subtitle="HTTP Request JSON Body" color="background">
+        <template v-slot:append>
+          <v-btn color="red" variant="text" icon @click="dialogJson = false;">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
+        <v-card-text>
+          <v-container>
+            <pre v-html="json" class="bg-grey-darken-3"/>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="ma-2">
+          <v-btn @click="generateJSON(currentPreset)"
+                 prepend-icon="mdi-content-copy"
+                 variant="plain"
+                 color="white"
+                 rounded="lg">
+            Copy JSON
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -217,7 +267,11 @@ export default {
   },
   computed: {
     validatePreset() {
-      return this.currentPreset.name !== null && this.currentPreset.name !== "" && this.currentPreset.actions !== 0;
+      return this.currentPreset.name !== null
+          && this.currentPreset.name !== ""
+          && this.currentPreset.actions !== 0
+          && this.presets.find(preset => preset.name === this.currentPreset.name) === undefined
+          || this.currentPreset.name === this.oldName;
     },
     presetCardTitle() {
       if (this.newPreset) {
@@ -225,22 +279,29 @@ export default {
       } else {
         return "Editing " + this.oldName ?? "Create a new lighting preset";
       }
-    }
+    },
   },
   data() {
     return {
       dialogPreset: false,
       dialogDelete: false,
+      dialogJson: false,
       currentPreset: null,
       currentIndex: null,
       oldName: null,
       newPreset: false,
       diyValues: {},
+      nameRules: {
+        required: value => !!value || "Required",
+        unique: value => (this.presets.find(preset => preset.name === value) === undefined || value === this.oldName) || "Name already in use",
+      },
+      json: null,
     };
   },
   methods: {
     generatePresetData() {
       let diy = {};
+      this.newPreset = true;
       this.currentPreset = {
         name: null,
         actions: 0,
@@ -248,18 +309,28 @@ export default {
       };
     },
     editPreset(preset, index) {
+      this.newPreset = false;
+      let diy = {};
+      for (let prop in preset.diy) {
+        diy[prop] = preset.diy[prop];
+      }
       this.currentPreset = {
         name: preset.name,
         actions: preset.actions,
-        diy: preset.diy,
+        diy: diy,
       };
       this.oldName = this.currentPreset.name;
       this.currentIndex = index;
       this.dialogPreset = true;
     },
     updateSelectData(device, value) {
-      this.currentPreset.diy[device.deviceName] = {sku: device.sku, addr: device.addr, value: value};
-      this.currentPreset.actions++;
+      this.currentPreset.diy[device.deviceName] = {
+        sku: device.sku,
+        addr: device.addr,
+        value: value,
+        name: this.diyValues[value]
+      };
+      this.currentPreset.actions = Object.keys(this.currentPreset.diy).length;
     },
     removeDiySelection(device) {
       delete this.currentPreset.diy[device.deviceName];
@@ -276,9 +347,7 @@ export default {
     },
     resetPresetDialog() {
       this.dialogPreset = false;
-      this.currentPreset.name = null;
       this.currentIndex = null;
-      this.newPreset = false;
     },
     saveOrUpdatePreset() {
       if (this.newPreset) {
@@ -294,6 +363,31 @@ export default {
       this.$emit("deletePreset", this.currentIndex);
       this.dialogDelete = false;
       this.dialogPreset = false;
+    },
+    generateJSON(preset) {
+      const json = {
+        actions: []
+      };
+      for (let [key, value] of Object.entries(preset.diy)) {
+        const request = {
+          requestId: "1",
+          payload: {
+            sku: value.sku,
+            device: value.addr,
+            capability: {
+              type: "devices.capabilities.dynamic_scene",
+              instance: "diyScene",
+              value: value.value
+            }
+          }
+        };
+        json.actions.push(request);
+      }
+      return JSON.stringify(json, null, 2);
+    },
+    openJsonDialog(preset) {
+      this.json = syntaxHighlight(this.generateJSON(preset));
+      this.dialogJson = true;
     }
   },
   watch: {
@@ -302,5 +396,27 @@ export default {
     }
   }
 };
+
+function syntaxHighlight(json) {
+  if (typeof json != "string") {
+    json = JSON.stringify(json, undefined, 2);
+  }
+  json = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = "number";
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = "key";
+      } else {
+        cls = "string";
+      }
+    } else if (/true|false/.test(match)) {
+      cls = "boolean";
+    } else if (/null/.test(match)) {
+      cls = "null";
+    }
+    return "<span class=\"" + cls + "\">" + match + "</span>";
+  });
+}
 
 </script>
