@@ -1,0 +1,1597 @@
+[
+  {
+    "sku": "H6008",
+    "addr": "00:00:00:00:00:00:00:01",
+    "deviceName": "Light Bulb",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      }
+    ],
+    "diy": [
+      {
+        "name": "Bulb DIY 1",
+        "value": 9341954,
+        "loading": false
+      }
+    ],
+    "states": {
+      "online": {
+        "value": true,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 1,
+        "loading": false
+      },
+      "brightness": {
+        "value": 100,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 5500,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  },
+  {
+    "sku": "H6062",
+    "addr": "00:00:00:00:00:00:00:02",
+    "deviceName": "Lightbar",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.toggle",
+        "instance": "gradientToggle",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedBrightness",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 28
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "brightness",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedColorRgb",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 28
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.music_setting",
+        "instance": "musicMode",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "musicMode",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "Energic",
+                  "value": 0
+                },
+                {
+                  "name": "Rhythm",
+                  "value": 1
+                },
+                {
+                  "name": "Bounce",
+                  "value": 2
+                },
+                {
+                  "name": "Hopping",
+                  "value": 3
+                },
+                {
+                  "name": "Strike",
+                  "value": 4
+                },
+                {
+                  "name": "Vibrate",
+                  "value": 5
+                },
+                {
+                  "name": "Separation",
+                  "value": 6
+                },
+                {
+                  "name": "PianoKeys",
+                  "value": 7
+                },
+                {
+                  "name": "Fountain",
+                  "value": 8
+                },
+                {
+                  "name": "DayAndNight",
+                  "value": 9
+                },
+                {
+                  "name": "Sprouting",
+                  "value": 10
+                },
+                {
+                  "name": "Shiny",
+                  "value": 11
+                }
+              ],
+              "required": true
+            },
+            {
+              "unit": "unit.percent",
+              "fieldName": "sensitivity",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            },
+            {
+              "fieldName": "autoColor",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "on",
+                  "value": 1
+                },
+                {
+                  "name": "off",
+                  "value": 0
+                }
+              ],
+              "required": false
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "snapshot",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      }
+    ],
+    "diy": [
+      {
+        "name": "Candy Cane",
+        "value": 9361831,
+        "loading": false
+      },
+      {
+        "name": "Christmas Red Green",
+        "value": 6493691,
+        "loading": false
+      },
+      {
+        "name": "Police",
+        "value": 9361867,
+        "loading": false
+      },
+      {
+        "name": "RGB",
+        "value": 5754152,
+        "loading": false
+      },
+      {
+        "name": "RGB Lightbar",
+        "value": 9361647,
+        "loading": false
+      },
+      {
+        "name": "RGB Neon",
+        "value": 5754170,
+        "loading": false
+      },
+      {
+        "name": "Shooting Star",
+        "value": 9361900,
+        "loading": false
+      },
+      {
+        "name": "Bulb DIY 1",
+        "value": 9341954,
+        "loading": false
+      },
+      {
+        "name": "Lightbar DIY 1",
+        "value": 6715979,
+        "loading": false
+      },
+      {
+        "name": "Neon DIY 1",
+        "value": 9341905,
+        "loading": false
+      },
+      {
+        "name": "Sub",
+        "value": 9361684,
+        "loading": false
+      }
+    ],
+    "states": {
+      "online": {
+        "value": true,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 1,
+        "loading": false
+      },
+      "brightness": {
+        "value": 10,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 0,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  },
+  {
+    "sku": "H6067",
+    "addr": "00:00:00:00:00:00:00:03",
+    "deviceName": "Glide Triangles",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.toggle",
+        "instance": "dreamViewToggle",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.toggle",
+        "instance": "gradientToggle",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedBrightness",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 20
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "brightness",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedColorRgb",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 20
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.music_setting",
+        "instance": "musicMode",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "musicMode",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "Calm",
+                  "value": 1
+                },
+                {
+                  "name": "Dynamic",
+                  "value": 2
+                },
+                {
+                  "name": "Energic",
+                  "value": 3
+                },
+                {
+                  "name": "Hopping",
+                  "value": 4
+                },
+                {
+                  "name": "Stacking",
+                  "value": 5
+                },
+                {
+                  "name": "Rippling",
+                  "value": 6
+                },
+                {
+                  "name": "Swiping",
+                  "value": 7
+                }
+              ],
+              "required": true
+            },
+            {
+              "unit": "unit.percent",
+              "fieldName": "sensitivity",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            },
+            {
+              "fieldName": "autoColor",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "on",
+                  "value": 1
+                },
+                {
+                  "name": "off",
+                  "value": 0
+                }
+              ],
+              "required": false
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "snapshot",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "Stream Triangles",
+              "value": 253332
+            }
+          ]
+        }
+      }
+    ],
+    "diy": [
+      {
+        "name": "Bulb DIY 1",
+        "value": 9341954,
+        "loading": false
+      },
+      {
+        "name": "Test Style",
+        "value": 6683732,
+        "loading": false
+      }
+    ],
+    "states": {
+      "online": {
+        "value": true,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 1,
+        "loading": false
+      },
+      "brightness": {
+        "value": 30,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 0,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  },
+  {
+    "sku": "H619C",
+    "addr": "00:00:00:00:00:00:00:04",
+    "deviceName": "Ceiling Lights",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.toggle",
+        "instance": "gradientToggle",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedBrightness",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 15
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "brightness",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedColorRgb",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 15
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.music_setting",
+        "instance": "musicMode",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "musicMode",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "Energic",
+                  "value": 1
+                },
+                {
+                  "name": "Rhythm",
+                  "value": 2
+                },
+                {
+                  "name": "Spectrum",
+                  "value": 3
+                },
+                {
+                  "name": "Rolling",
+                  "value": 4
+                },
+                {
+                  "name": "Separation",
+                  "value": 5
+                },
+                {
+                  "name": "Hopping",
+                  "value": 6
+                },
+                {
+                  "name": "PianoKeys",
+                  "value": 7
+                },
+                {
+                  "name": "Fountain",
+                  "value": 8
+                },
+                {
+                  "name": "DayAndNight",
+                  "value": 9
+                },
+                {
+                  "name": "Sprouting",
+                  "value": 10
+                },
+                {
+                  "name": "Shiny",
+                  "value": 11
+                }
+              ],
+              "required": true
+            },
+            {
+              "unit": "unit.percent",
+              "fieldName": "sensitivity",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            },
+            {
+              "fieldName": "autoColor",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "on",
+                  "value": 1
+                },
+                {
+                  "name": "off",
+                  "value": 0
+                }
+              ],
+              "required": false
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "snapshot",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      }
+    ],
+    "diy": [
+      {
+        "name": "Candy Cane",
+        "value": 9361831,
+        "loading": false
+      },
+      {
+        "name": "Christmas Red Green",
+        "value": 6493691,
+        "loading": false
+      },
+      {
+        "name": "Police",
+        "value": 9361867,
+        "loading": false
+      },
+      {
+        "name": "RGB",
+        "value": 5754152,
+        "loading": false
+      },
+      {
+        "name": "RGB Lightbar",
+        "value": 9361647,
+        "loading": false
+      },
+      {
+        "name": "RGB Neon",
+        "value": 5754170,
+        "loading": false
+      },
+      {
+        "name": "Bulb DIY 1",
+        "value": 9341954,
+        "loading": false
+      },
+      {
+        "name": "Lightbar DIY 1",
+        "value": 6715979,
+        "loading": false
+      },
+      {
+        "name": "Neon DIY 1",
+        "value": 9341905,
+        "loading": false
+      }
+    ],
+    "states": {
+      "online": {
+        "value": true,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 1,
+        "loading": false
+      },
+      "brightness": {
+        "value": 100,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 0,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  },
+  {
+    "sku": "H61A0",
+    "addr": "00:00:00:00:00:00:00:05",
+    "deviceName": "Neon",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.toggle",
+        "instance": "gradientToggle",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedBrightness",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 18
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "brightness",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.segment_color_setting",
+        "instance": "segmentedColorRgb",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "segment",
+              "size": {
+                "min": 1,
+                "max": 18
+              },
+              "dataType": "Array",
+              "elementRange": {
+                "min": 0,
+                "max": 14
+              },
+              "elementType": "INTEGER",
+              "required": true
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.music_setting",
+        "instance": "musicMode",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "musicMode",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "Energic",
+                  "value": 1
+                },
+                {
+                  "name": "Rhythm",
+                  "value": 2
+                },
+                {
+                  "name": "Spectrum",
+                  "value": 3
+                },
+                {
+                  "name": "Rolling",
+                  "value": 4
+                },
+                {
+                  "name": "Separation",
+                  "value": 5
+                },
+                {
+                  "name": "Hopping",
+                  "value": 6
+                },
+                {
+                  "name": "PianoKeys",
+                  "value": 7
+                },
+                {
+                  "name": "Fountain",
+                  "value": 8
+                },
+                {
+                  "name": "DayAndNight",
+                  "value": 9
+                },
+                {
+                  "name": "Sprouting",
+                  "value": 10
+                },
+                {
+                  "name": "Shiny",
+                  "value": 11
+                }
+              ],
+              "required": true
+            },
+            {
+              "unit": "unit.percent",
+              "fieldName": "sensitivity",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            },
+            {
+              "fieldName": "autoColor",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "on",
+                  "value": 1
+                },
+                {
+                  "name": "off",
+                  "value": 0
+                }
+              ],
+              "required": false
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "snapshot",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      }
+    ],
+    "diy": [
+      {
+        "name": "Candy Cane",
+        "value": 9361831,
+        "loading": false
+      },
+      {
+        "name": "Christmas Red Green",
+        "value": 6493691,
+        "loading": false
+      },
+      {
+        "name": "Police",
+        "value": 9361867,
+        "loading": false
+      },
+      {
+        "name": "RGB",
+        "value": 5754152,
+        "loading": false
+      },
+      {
+        "name": "RGB Lightbar",
+        "value": 9361647,
+        "loading": false
+      },
+      {
+        "name": "RGB Neon",
+        "value": 5754170,
+        "loading": false
+      },
+      {
+        "name": "Bulb DIY 1",
+        "value": 9341954,
+        "loading": false
+      },
+      {
+        "name": "Lightbar DIY 1",
+        "value": 6715979,
+        "loading": false
+      },
+      {
+        "name": "Neon DIY 1",
+        "value": 9341905,
+        "loading": false
+      }
+    ],
+    "states": {
+      "online": {
+        "value": false,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 0,
+        "loading": false
+      },
+      "brightness": {
+        "value": 100,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 0,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  },
+  {
+    "sku": "H70B1",
+    "addr": "00:00:00:00:00:00:00:06",
+    "deviceName": "Curtain Lights",
+    "type": "devices.types.light",
+    "capabilities": [
+      {
+        "type": "devices.capabilities.on_off",
+        "instance": "powerSwitch",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": [
+            {
+              "name": "on",
+              "value": 1
+            },
+            {
+              "name": "off",
+              "value": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.range",
+        "instance": "brightness",
+        "parameters": {
+          "unit": "unit.percent",
+          "dataType": "INTEGER",
+          "range": {
+            "min": 1,
+            "max": 100,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorRgb",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 0,
+            "max": 16777215,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.color_setting",
+        "instance": "colorTemperatureK",
+        "parameters": {
+          "dataType": "INTEGER",
+          "range": {
+            "min": 2000,
+            "max": 9000,
+            "precision": 1
+          }
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "lightScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.music_setting",
+        "instance": "musicMode",
+        "parameters": {
+          "dataType": "STRUCT",
+          "fields": [
+            {
+              "fieldName": "musicMode",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "MeteorShower",
+                  "value": 1
+                },
+                {
+                  "name": "Crossing",
+                  "value": 2
+                },
+                {
+                  "name": "DreamColor",
+                  "value": 3
+                },
+                {
+                  "name": "FloatingMist",
+                  "value": 4
+                },
+                {
+                  "name": "Spectrum",
+                  "value": 5
+                },
+                {
+                  "name": "FallingSand",
+                  "value": 6
+                }
+              ],
+              "required": true
+            },
+            {
+              "unit": "unit.percent",
+              "fieldName": "sensitivity",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "required": true
+            },
+            {
+              "fieldName": "autoColor",
+              "dataType": "ENUM",
+              "options": [
+                {
+                  "name": "on",
+                  "value": 1
+                },
+                {
+                  "name": "off",
+                  "value": 0
+                }
+              ],
+              "required": false
+            },
+            {
+              "fieldName": "rgb",
+              "dataType": "INTEGER",
+              "range": {
+                "min": 0,
+                "max": 16777215,
+                "precision": 1
+              },
+              "required": false
+            }
+          ]
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "diyScene",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      },
+      {
+        "type": "devices.capabilities.dynamic_scene",
+        "instance": "snapshot",
+        "parameters": {
+          "dataType": "ENUM",
+          "options": []
+        }
+      }
+    ],
+    "diy": [],
+    "states": {
+      "online": {
+        "value": false,
+        "loading": false
+      },
+      "powerSwitch": {
+        "value": 0,
+        "loading": false
+      },
+      "brightness": {
+        "value": 100,
+        "loading": false
+      },
+      "colorTemperatureK": {
+        "value": 2000,
+        "loading": false
+      }
+    },
+    "dialogMenu": false
+  }
+]

@@ -6,7 +6,8 @@ import Presets from "@/components/Presets.vue";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import axios from "axios";
-import IconCommunity from "@/components/icons/IconCommunity.vue";
+
+const demo = false;
 
 const theme = useTheme();
 
@@ -31,8 +32,6 @@ const storageSuccess = ref(false);
 const apiSuccess = ref(false);
 const presets = ref([]);
 
-const emit = defineEmits(["refresh", "setDeviceCapability", "powerSwitch", "savePreset", "deletePreset", "updatePreset"]);
-
 const Http = Object.freeze({
   GET: "GET",
   POST: "POST",
@@ -52,6 +51,8 @@ const Capability = Object.freeze({
   DIY: {type: "devices.capabilities.dynamic_scene", instance: "diyScene"},
   SCENE: {type: "devices.capabilities.dynamic_scene", instance: "lightScene"},
 });
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
@@ -89,6 +90,7 @@ function storageAvailable(type) {
 }
 
 function submitKey() {
+  if (demo) return;
   apiKey.value = newKey.value;
   if (storageAvailable("localStorage")) {
     localStorage.setItem("apiKey", apiKey.value);
@@ -104,7 +106,7 @@ function showSnackbar(text) {
 
 onMounted(() => {
   if (storageAvailable("localStorage")) {
-    apiKey.value = localStorage.getItem("apiKey");
+    apiKey.value = !demo ? localStorage.getItem("apiKey") : "12345678-abcd-1234-abcd-123456abcdef";
   } else {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; Govee-API-Key=`);
@@ -122,7 +124,7 @@ onMounted(() => {
     presets.value = JSON.parse(localStorage.getItem("presets")) ?? [];
 
     let deviceStorage = localStorage.getItem("devices");
-    if (deviceStorage !== undefined && deviceStorage !== null && deviceStorage !== "[]") {
+    if (deviceStorage !== undefined && deviceStorage !== null && deviceStorage !== "[]" && !demo) {
       devices.value = JSON.parse(localStorage.getItem("devices"));
       for (const value of devices.value) {
         value.states[DeviceState.ONLINE] = null;
@@ -134,7 +136,6 @@ onMounted(() => {
       storageSuccess.value = true;
     } else {
       if (apiKey.value !== null) {
-        console.log(apiKey.value);
         refreshDevices().then(() => apiSuccess.value = true);
       } else {
         noKey.value = true;
@@ -155,39 +156,56 @@ onMounted(() => {
 async function refreshDevices() {
   devices.value = [];
   refreshing.value = true;
-  try {
-    const response = await httpRequest(apiKey.value, "https://openapi.api.govee.com/router/api/v1/user/devices", Http.GET, {});
-    const data = response.data;
-    //skeletons.value = data.data.length;
-
-    const devicePromises = data.data.map(item => {
-      return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject("Promise timed out.");
-        }, 5000); // Set your desired timeout value.
-
-        Promise.resolve(transformItemToDevice(item))
-            .then((deviceObj) => postDeviceIfHasDiy(deviceObj))
-            .then((result) => {
-              clearTimeout(timeout);
-              resolve(result);
-            })
-            .catch((error) => {
-              clearTimeout(timeout);
-              reject(error);
-            });
-      });
+  if (demo) {
+    fetch("demo-data.json").then(async value => {
+      await sleep(1500);
+      devices.value = await value.json();
+      refreshing.value = false;
+      lastRefresh.value = dayjs();
+      currentTime.value = dayjs();
+      localStorage.setItem("lastRefresh", lastRefresh.value);
     });
+  } else {
+    try {
+      const response = await axios({
+        url: "./request.php",
+        method: Http.GET,
+        params: {"api_key": apiKey.value, "url": "https://openapi.api.govee.com/router/api/v1/user/devices"},
+        headers: {"Content-Type": "application/json"},
+        data: {},
+      });
+      const data = response.data;
+      //skeletons.value = data.data.length;
 
-    devices.value = await Promise.all(devicePromises);
-    devices.value.sort((a, b) => a.sku.localeCompare(b.sku));
-  } catch (error) {
-    console.log("Error:", error);
-  } finally {
-    refreshing.value = false;
-    lastRefresh.value = dayjs();
-    currentTime.value = dayjs();
-    localStorage.setItem("lastRefresh", lastRefresh.value);
+      const devicePromises = data.data.map(item => {
+        return new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject("Promise timed out.");
+          }, 5000); // Set your desired timeout value.
+
+          Promise.resolve(transformItemToDevice(item))
+              .then((deviceObj) => postDeviceIfHasDiy(deviceObj))
+              .then((result) => {
+                clearTimeout(timeout);
+                resolve(result);
+              })
+              .catch((error) => {
+                clearTimeout(timeout);
+                reject(error);
+              });
+        });
+      });
+
+      devices.value = await Promise.all(devicePromises);
+      devices.value.sort((a, b) => a.sku.localeCompare(b.sku));
+    } catch (error) {
+      console.log("Error:", error);
+    } finally {
+      refreshing.value = false;
+      lastRefresh.value = dayjs();
+      currentTime.value = dayjs();
+      localStorage.setItem("lastRefresh", lastRefresh.value);
+    }
   }
 }
 
@@ -208,12 +226,17 @@ async function handleWorkerResponse(e) {
 }
 
 async function getDeviceStates(apiKey, device) {
-  const response = await httpRequest(apiKey, "https://openapi.api.govee.com/router/api/v1/device/state", Http.POST, {
-    requestId: "uuid",
-    payload: {
-      sku: device.sku,
-      device: device.addr,
-    },
+  const response = await httpRequest(apiKey, Http.POST, {
+    actions: [{
+      url: "https://openapi.api.govee.com/router/api/v1/device/state",
+      body: {
+        requestId: "uuid",
+        payload: {
+          sku: device.sku,
+          device: device.addr,
+        },
+      },
+    }]
   });
 
   const data = response.data;
@@ -229,12 +252,17 @@ async function getDeviceStates(apiKey, device) {
 }
 
 async function setDeviceStates(apiKey, device) {
-  const response = await httpRequest(apiKey, "https://openapi.api.govee.com/router/api/v1/device/state", Http.POST, {
-    requestId: "uuid",
-    payload: {
-      sku: device.sku,
-      device: device.addr,
-    },
+  const response = await httpRequest(apiKey, Http.POST, {
+    actions: [{
+      url: "https://openapi.api.govee.com/router/api/v1/device/state",
+      body: {
+        requestId: "uuid",
+        payload: {
+          sku: device.sku,
+          device: device.addr,
+        },
+      },
+    }]
   });
   const data = response.data;
   const capabilities = data.payload.capabilities;
@@ -248,11 +276,11 @@ async function setDeviceStates(apiKey, device) {
   device.states = deviceStates;
 }
 
-async function httpRequest(apiKey, url, method, data) {
+async function httpRequest(apiKey, method, data) {
   return axios({
-    url: "https://gamerbah.com/govee/api/request.php",
+    url: "./request.php",
     method: method,
-    params: {"api_key": apiKey, "api_url": url},
+    params: {"api_key": apiKey},
     headers: {"Content-Type": "application/json"},
     data: data,
   });
@@ -261,9 +289,9 @@ async function httpRequest(apiKey, url, method, data) {
 async function setDeviceCapability(device, capability, instance, value) {
   instance.loading = true;
   blockStateChange.value = true;
-  let response = await httpRequest(apiKey.value, "https://openapi.api.govee.com/router/api/v1/device/control", Http.POST, generateJSON(device, capability, value));
+  let response = !demo ? await httpRequest(apiKey.value, Http.POST, generateJSON("https://openapi.api.govee.com/router/api/v1/device/control", device, capability, value)) : await sleep(1000);
 
-  if (response.data.code === 200) {
+  if (demo || response.data.code === 200) {
     instance.value = value;
     instance.loading = false;
     blockStateChange.value = false;
@@ -279,7 +307,7 @@ function deviceHasDiy(capabilities) {
 async function postDeviceIfHasDiy(deviceObj) {
   if (deviceHasDiy(deviceObj.capabilities)) {
     const obj = {
-      php: "https://gamerbah.com/govee/api/request.php",
+      php: "./request.php",
       apiKey: apiKey.value,
       deviceObj: deviceObj,
       url: "https://openapi.api.govee.com/router/api/v1/device/diy-scenes"
@@ -330,27 +358,32 @@ function isOn(device) {
 
 async function powerSwitch(device) {
   device.states[DeviceState.POWER].loading = true;
-  const response = await httpRequest(apiKey.value, "https://openapi.api.govee.com/router/api/v1/device/control",
-      Http.POST, generateJSON(device, Capability.POWER, isOn(device) ? 0 : 1));
+  const response = !demo ? await httpRequest(apiKey.value, Http.POST, generateJSON("https://openapi.api.govee.com/router/api/v1/device/control", device, Capability.POWER, isOn(device) ? 0 : 1)) : await sleep(2000);
 
-  if (response.data.code === 200) {
-    device.states[DeviceState.POWER].value = response.data.capability.value;
+  if (demo || response.data.code === 200) {
+    let val = device.states[DeviceState.POWER].value;
+    device.states[DeviceState.POWER].value = !demo ? response.data.capability.value : val === 0 ? 1 : 0;
     device.states[DeviceState.POWER].loading = false;
   }
 }
 
-function generateJSON(device, capability, value) {
+function generateJSON(url, device, capability, value) {
   const json = {
-    requestId: "1",
-    payload: {
-      sku: device.sku,
-      device: device.addr,
-      capability: {
-        type: capability.type,
-        instance: capability.instance,
-        value: value
+    actions: [{
+      url: url,
+      body: {
+        requestId: "1",
+        payload: {
+          sku: device.sku,
+          device: device.addr,
+          capability: {
+            type: capability.type,
+            instance: capability.instance,
+            value: value
+          }
+        }
       }
-    }
+    }]
   };
   return JSON.stringify(json, null, 2);
 }
@@ -382,6 +415,10 @@ function updatePreset(index, preset) {
   localStorage.setItem("presets", JSON.stringify(presets.value));
 }
 
+async function playPreset(json) {
+  let response = await httpRequest(apiKey.value, Http.POST, json);
+}
+
 </script>
 
 <template>
@@ -392,15 +429,15 @@ function updatePreset(index, preset) {
       </v-app-bar-nav-icon>
       <v-app-bar-title>Controllify for Govee</v-app-bar-title>
       <template v-slot:append>
-        <v-icon>mdi-weather-sunny</v-icon>
-        <v-switch class="px-2"
+        <v-icon class="d-none d-sm-flex">mdi-weather-sunny</v-icon>
+        <v-switch class="d-none d-sm-flex px-2"
                   hide-details
                   v-model="theme.global.name.value"
                   true-value="dark"
                   false-value="light"
                   color="accent"/>
-        <v-icon>mdi-weather-night</v-icon>
-        <v-divider vertical thickness="2" class="mx-5 my-2"/>
+        <v-icon class="d-none d-sm-flex">mdi-weather-night</v-icon>
+        <v-divider vertical thickness="2" class="d-none d-sm-flex mx-5 my-2"/>
         <v-btn icon class="mr-5" @click="settings = true; newKey = apiKey">
           <v-icon>mdi-cog</v-icon>
         </v-btn>
@@ -429,12 +466,13 @@ function updatePreset(index, preset) {
                   :refreshing="refreshing"
                   :current-time="currentTime"
                   :last-refresh="lastRefresh"
-                  :block-state-change="blockStateChange" :show-advanced-info="showAdvancedInfo"/>
+                  :block-state-change="blockStateChange"
+                  :show-advanced-info="showAdvancedInfo"/>
           </v-tabs-window-item>
           <v-tabs-window-item key="presets" value="presets">
             <Presets @save-preset="savePreset"
                      @delete-preset="deletePreset"
-                     @update-preset="updatePreset"
+                     @update-preset="updatePreset" @play-preset="playPreset"
                      :devices="devices"
                      :presets="presets"
                      :show-advanced-info="showAdvancedInfo"/>
@@ -458,8 +496,12 @@ function updatePreset(index, preset) {
 
     <!---->
 
-    <v-dialog v-model="settings" max-width="60em" v-on:close="showKey = false">
-      <v-card prepend-icon="mdi-cog" title="Settings" rounded="xl">
+    <v-dialog v-model="settings"
+              max-width="60em"
+              v-on:close="showKey = false"
+              :fullscreen="$vuetify.display.smAndDown"
+              :transition="$vuetify.display.smAndDown ? 'dialog-bottom-transition' : 'slide-y-reverse-transition'">
+      <v-card prepend-icon="mdi-cog" title="Settings" :rounded="$vuetify.display.smAndDown ? 0 : 'xl'">
         <template v-slot:append>
           <v-btn variant="plain" color="red" icon @click="settings = false">
             <v-icon icon="mdi-close"></v-icon>
@@ -470,8 +512,8 @@ function updatePreset(index, preset) {
           <v-container>
             <h3>GOVEE API</h3>
             <v-row class="d-flex align-center my-2">
-              <v-col cols="10">
-                <v-text-field prepend-icon="mdi-key"
+              <v-col md="10" sm="9" cols="12">
+                <v-text-field v-if="$vuetify.display.mdAndUp" prepend-icon="mdi-key"
                               label="API Key"
                               variant="solo-filled"
                               hide-details
@@ -479,8 +521,17 @@ function updatePreset(index, preset) {
                               :type="showKey ? 'text' : 'password'"
                               @click:append="showKey = !showKey"
                               v-model="newKey"/>
+                <v-text-field v-else
+                              label="API Key"
+                              variant="solo-filled"
+                              hide-details
+                              :append-icon="showKey ? 'mdi-eye' : 'mdi-eye-off'"
+                              :type="showKey ? 'text' : 'password'"
+                              @click:append="showKey = !showKey"
+                              v-model="newKey"/>
+
               </v-col>
-              <v-col cols="2">
+              <v-col md="2" sm="3" cols="12">
                 <v-btn block
                        size="large"
                        rounded="lg"
@@ -492,10 +543,10 @@ function updatePreset(index, preset) {
             <v-divider/>
             <h3 class="mt-5">GENERAL</h3>
             <v-row class="d-flex align-center">
-              <v-col cols="3">
+              <v-col md="3" sm="5" cols="10">
                 <span>Dark Mode</span>
               </v-col>
-              <v-col cols="3">
+              <v-col md="3" sm="4">
                 <v-switch hide-details
                           v-model="theme.global.name.value"
                           true-value="dark"
@@ -504,18 +555,18 @@ function updatePreset(index, preset) {
               </v-col>
             </v-row>
             <v-row class="d-flex align-center">
-              <v-col cols="3">
+              <v-col md="3" sm="5" cols="10">
                 <span>Display API Call Limit</span>
               </v-col>
-              <v-col cols="3">
+              <v-col md="3" sm="4">
                 <v-switch hide-details v-model="displayCallLimit" color="accent"></v-switch>
               </v-col>
             </v-row>
             <v-row class="d-flex align-center">
-              <v-col cols="3">
+              <v-col md="3" sm="5" cols="10">
                 <span>Advanced Device Info</span>
               </v-col>
-              <v-col cols="3">
+              <v-col md="3" sm="4">
                 <v-switch hide-details v-model="showAdvancedInfo" color="accent"></v-switch>
               </v-col>
             </v-row>
@@ -534,6 +585,7 @@ function updatePreset(index, preset) {
         <v-card-text>
           <v-container>
             <span>It looks like you don't have an API key set! Click settings in the top right corner to set a key.</span>
+            <span v-if="demo">DEMO VERSION -- THIS CAN BE IGNORED :)</span>
           </v-container>
         </v-card-text>
       </v-card>

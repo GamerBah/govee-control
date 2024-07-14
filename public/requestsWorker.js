@@ -10,11 +10,16 @@ self.onmessage = async (e) => {
             params: {"api_key": apiKey, "api_url": url},
             headers: {"Content-Type": "application/json"},
             data: {
-                requestId: "uuid",
-                payload: {
-                    sku: deviceObj.sku,
-                    device: deviceObj.addr,
-                },
+                actions: [{
+                    url: url,
+                    body: {
+                        requestId: "uuid",
+                        payload: {
+                            sku: deviceObj.sku,
+                            device: deviceObj.addr,
+                        },
+                    }
+                }]
             },
         });
 
@@ -25,4 +30,4 @@ self.onmessage = async (e) => {
     } catch (error) {
         console.log("Error:", error);
     }
-}
+};

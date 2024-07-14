@@ -1,22 +1,22 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <div class="d-flex align-baseline">
       <v-btn class="mb-5"
              variant="elevated"
              elevation="7"
              color="secondary"
-             rounded="lg"
+             rounded="lg" :block="$vuetify.display.xs" :size="$vuetify.display.xs ? 'large' : 'default'"
              @click="$emit('refresh')"
              prepend-icon="mdi-refresh"
              :loading="refreshing">
         <b>Refresh</b>
       </v-btn>
-      <span id="refresh">Last refreshed {{ timeSinceRefresh() }}</span>
+      <span class="d-none d-sm-flex" id="refresh">Last refreshed {{ timeSinceRefresh() }}</span>
     </div>
     <div class="d-flex flex-wrap">
       <template v-if="devices.length">
         <v-row align="center">
-          <v-col v-for="device in devices" :key="device.name" cols="4" xl="3">
+          <v-col v-for="device in devices" :key="device.name" cols="12" xl="3" lg="4" md="6" sm="6">
             <v-card class="card mx-auto my-auto"
                     rounded="lg"
                     @click="selectDevice(device)"
@@ -25,13 +25,28 @@
                     :color="connectionStatus(device) === 0 ? `disconnected` : isOn(device) ? `primary` : `primary-dark`"
                     :disabled="connectionStatus(device) === 0">
               <template v-slot:title>
+                <v-icon v-if="connectionStatus(device) === 1" class="d-sm-none mr-3" color="green" size="x-small" start>
+                  mdi-wifi
+                </v-icon>
+                <v-icon v-else-if="connectionStatus(device) === 0"
+                        class="d-sm-none mr-3"
+                        color="red"
+                        size="x-small"
+                        start>mdi-connection
+                </v-icon>
+                <v-icon v-else class="d-sm-none mr-3" color="blue" size="x-small" start>mdi-connection</v-icon>
                 <span class="mr-3">{{ device.deviceName }}</span>
-                <span v-if="showAdvancedInfo" id="sku" class="flex-grow-1 text-grey">{{ device.sku }}</span>
+                <span v-if="showAdvancedInfo" id="sku" class="d-sm-none d-md-inline flex-grow-1 text-grey">{{
+                    device.sku
+                  }}</span>
+                <span v-if="showAdvancedInfo"
+                      id="sku"
+                      class="d-none d-sm-inline d-md-none flex-grow-1 text-grey"><br>{{ device.sku }}</span>
               </template>
               <template v-slot:append>
                 <v-btn icon
-                       variant="plain"
-                       density="compact"
+                       :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
+                       :density="$vuetify.display.xs ? 'default' : 'compact'"
                        @click.stop="$emit('powerSwitch', device)"
                        :color="connectionStatus(device) === -1 ? 'info' : isOn(device) ? 'green' : 'red'"
                        :loading="connectionStatus(device) === -1 || device.states[capabilities.POWER.instance].loading">
@@ -53,15 +68,15 @@
                 </v-chip>
               </v-card-text>
 
-              <v-card-actions v-if="connectionStatus(device) === 1" class="d-flex align-baseline ml-2">
+              <v-card-actions v-if="connectionStatus(device) === 1" class="d-none d-sm-flex align-baseline ml-2">
                 <v-icon color="green" size="x-small">mdi-wifi</v-icon>
                 <span class="ml-2 text-green">Connected</span>
               </v-card-actions>
-              <v-card-actions v-else-if="connectionStatus(device) === 0" class="d-flex align-baseline ml-2">
+              <v-card-actions v-else-if="connectionStatus(device) === 0" class="d-none d-sm-flex align-baseline ml-2">
                 <v-icon color="red" size="x-small">mdi-connection</v-icon>
                 <span class="ml-2 text-red">Disconnected</span>
               </v-card-actions>
-              <v-card-actions v-else class="d-flex align-baseline ml-2">
+              <v-card-actions v-else class="d-none d-sm-flex align-baseline ml-2">
                 <v-icon color="info" size="x-small">mdi-connection</v-icon>
                 <span class="ml-2 text-indigo">Connecting...</span>
               </v-card-actions>
@@ -80,35 +95,45 @@
       <!-- THIS NEEDS TO BE IN ITS OWN COMPONENT IN THE FUTURE -->
       <!-- Device Card -->
 
-      <v-dialog v-for="device in devices" v-model="device.dialogMenu" max-width="80em">
-        <v-card rounded="xl" color="background">
+      <v-dialog v-for="device in devices"
+                v-model="device.dialogMenu"
+                max-width="80em"
+                :fullscreen="$vuetify.display.smAndDown"
+                :transition="$vuetify.display.smAndDown ? 'dialog-bottom-transition' : 'slide-y-reverse-transition'">
+        <v-card :rounded="$vuetify.display.smAndDown ? 0 : 'xl'" color="background">
           <template v-slot:title>
+            <v-icon v-if="connectionStatus(device) === 1" class="d-sm-none mr-3" color="green" size="x-small" start>
+              mdi-wifi
+            </v-icon>
             <span class="mr-3">{{ device.deviceName }}</span>
             <span v-if="showAdvancedInfo" id="sku" class="text-grey">{{ device.sku }}</span>
-            <span class="pl-5 flex-grow-1">
+            <span class="d-none d-sm-inline pl-5 flex-grow-1">
               <v-icon color="green" size="x-small">mdi-wifi</v-icon>
               <span class="ml-2 text-green text-body-1">Connected</span>
             </span>
           </template>
           <template v-slot:append>
-            <v-btn color="red" variant="text" icon @click="device.dialogMenu = false;">
+            <v-btn color="red"
+                   :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
+                   icon
+                   @click="device.dialogMenu = false;">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
           <v-divider class="mt-2 mx-5"/>
           <v-card-text>
-            <v-container>
-              <v-row>
+            <v-container fluid>
+              <v-row no-gutters>
                 <!-- CONTROLS -->
-                <v-col>
-                  <v-row no-gutters>
-                    <v-col class="px-2">
+                <v-col cols="12" md="3">
+                  <v-row>
+                    <v-col class="px-2 py-2" cols="12" md="5">
                       <v-slider @end="$emit('setDeviceCapability', device, capabilities.BRIGHTNESS, device.states[capabilities.BRIGHTNESS.instance], brightnessSlider)"
                                 style="min-width: 42px;"
                                 color="accent"
                                 v-model="brightnessSlider"
                                 :disabled="blockStateChange"
-                                direction="vertical"
+                                :direction="$vuetify.display.smAndDown ? 'horizontal' : 'vertical'"
                                 min="1"
                                 max="100"
                                 step="1">
@@ -120,12 +145,12 @@
                         </template>
                       </v-slider>
                     </v-col>
-                    <v-col class="px-2">
+                    <v-col class="px-2 py-2" cols="12" md="5">
                       <v-slider @end="$emit('setDeviceCapability', device, capabilities.COLOR_TEMP, device.states[capabilities.COLOR_TEMP.instance], kelvinSlider)"
                                 style="min-width: 42px"
                                 v-model="kelvinSlider"
                                 :disabled="kelvinSlider < 2000 || blockStateChange"
-                                direction="vertical"
+                                :direction="$vuetify.display.smAndDown ? 'horizontal' : 'vertical'"
                                 :color="kToHex(kelvinSlider)"
                                 min="2000"
                                 max="9000"
@@ -140,11 +165,12 @@
                     </v-col>
                   </v-row>
                 </v-col>
-
+                <v-spacer/>
                 <!-- PRESETS -->
-                <v-col cols="8">
-                  <v-row no-gutters class="justify-end">
-                    <v-col v-for="diy in device.diy" :key="diy.value" class="flex-grow-1" cols="5">
+                <v-col cols="12" md="9">
+                  <v-row no-gutters>
+                    <v-divider class="d-md-none d-sm-flex my-5 mx-n5"></v-divider>
+                    <v-col v-for="diy in device.diy" :key="diy.value" class="flex-grow-1" cols="12" sm="6" lg="4">
                       <v-card rounded="lg"
                               variant="elevated"
                               elevation="5"
@@ -156,8 +182,9 @@
                           <span class="mr-3 text-body-2">{{ diy.name }}</span>
                         </template>
                         <template v-slot:append>
-                          <v-btn @click.stop="copyJSON(generateJSON(device, capabilities.DIY, diy.value))"
-                                 variant="plain"
+                          <v-btn class="d-none d-sm-flex"
+                                 @click.stop="copyJSON(generateJSON(device, capabilities.DIY, diy.value))"
+                                 :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
                                  color="default"
                                  size="small"
                                  icon>
@@ -167,7 +194,7 @@
                             </v-tooltip>
                           </v-btn>
                           <v-btn @click.stop="openJSONDialog(device, capabilities.DIY, diy, diy.value)"
-                                 variant="plain"
+                                 :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
                                  color="default"
                                  size="small"
                                  icon>
@@ -274,7 +301,7 @@ export default {
     blockStateChange: Boolean,
     showAdvancedInfo: Boolean,
   },
-  emits: ["savePreset"],
+  emits: ["powerSwitch", "setDeviceCapability", "refresh"],
   data() {
     return {
       apiKey: "apiKey",

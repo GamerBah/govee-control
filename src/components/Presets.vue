@@ -2,8 +2,7 @@
   <v-container>
     <div class="d-flex align-baseline">
       <v-btn class="mb-5"
-             variant="elevated"
-             elevation="7" block @click="openPresetDialog(true)"
+             variant="elevated" elevation="7" block @click="openPresetDialog(true)"
              size="large"
              color="secondary"
              rounded="lg"
@@ -26,8 +25,7 @@
               </template>
               <template v-slot:append>
                 <v-btn class="position-absolute"
-                       style="top: 20%; right: 20px"
-                       @click.stop="console.log('NYI')"
+                       style="top: 20%; right: 20px" @click.stop="$emit('playPreset', generateJSON(preset))"
                        variant="elevated"
                        color="green"
                        icon>
@@ -57,7 +55,7 @@
             <v-col cols="5">
               <span>{{ presetCardTitle }}</span>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="3" v-if="!newPreset">
               <v-btn @click="generateJSON(currentPreset)"
                      prepend-icon="mdi-content-copy"
                      variant="plain"
@@ -66,7 +64,7 @@
                 Copy JSON
               </v-btn>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="3" v-if="!newPreset">
               <v-btn @click="openJsonDialog(currentPreset)"
                      prepend-icon="mdi-eye"
                      variant="plain"
@@ -93,7 +91,9 @@
                               placeholder="New Preset"
                               persistent-placeholder
                               variant="solo-filled"
-                              color="accent" validate-on="input" :rules="[nameRules.unique, nameRules.required]"
+                              color="accent"
+                              validate-on="input"
+                              :rules="[nameRules.unique, nameRules.required]"
                               v-model="currentPreset.name"></v-text-field>
               </v-col>
             </v-row>
@@ -113,7 +113,8 @@
                               color="accent"
                               :item-value="'value'"
                               :items="device.diy"
-                              v-model="currentPreset.diy[device.deviceName]" @click:clear="removeDiySelection(device)"
+                              v-model="currentPreset.diy[device.deviceName]"
+                              @click:clear="removeDiySelection(device)"
                               @update:modelValue="updateSelectData(device, currentPreset.diy[device.deviceName])">
                       <template v-slot:item="{ props, item }">
                         <v-list-item v-if="showAdvancedInfo"
@@ -196,7 +197,7 @@
             <pre v-html="json" class="bg-grey-darken-3"/>
           </v-container>
         </v-card-text>
-        <v-card-actions class="ma-2">
+        <v-card-actions class="mx-5 my-5">
           <v-btn @click="generateJSON(currentPreset)"
                  prepend-icon="mdi-content-copy"
                  variant="plain"
@@ -265,6 +266,7 @@ export default {
     presets: Array,
     showAdvancedInfo: Boolean,
   },
+  emits: ["savePreset", "updatePreset", "deletePreset", "playPreset"],
   computed: {
     validatePreset() {
       return this.currentPreset.name !== null
@@ -370,14 +372,17 @@ export default {
       };
       for (let [key, value] of Object.entries(preset.diy)) {
         const request = {
-          requestId: "1",
-          payload: {
-            sku: value.sku,
-            device: value.addr,
-            capability: {
-              type: "devices.capabilities.dynamic_scene",
-              instance: "diyScene",
-              value: value.value
+          url: "https://openapi.api.govee.com/router/api/v1/device/control",
+          body: {
+            requestId: "1",
+            payload: {
+              sku: value.sku,
+              device: value.addr,
+              capability: {
+                type: "devices.capabilities.dynamic_scene",
+                instance: "diyScene",
+                value: value.value
+              }
             }
           }
         };
