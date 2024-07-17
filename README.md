@@ -20,15 +20,6 @@ A web-app for using Govee lights the smarter way
 </p>
 </div>
 
-<style>
-h1, h2, h3 {
-    font-family: "Signika", sans-serif;
-}
-p, li {
-    font-family: "Comfortaa", sans-serif;
-}
-</style>
-
 # About Controllify
 
 ---
