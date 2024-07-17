@@ -9,7 +9,7 @@
 <a href="https://github.com/GamerBah/govee-control">
 <img src="https://gamerbah.com/govee/Banner.png" alt="Logo" width="auto" height="100">
 </a>
-<h2 align="center">Controllify for Govee</h2>
+<h3 align="center">Controllify for Govee</h2>
 <p align="center">
 A web-app for using Govee lights the smarter way
 <br/>
@@ -19,10 +19,9 @@ A web-app for using Govee lights the smarter way
 <a href="https://github.com/GamerBah/govee-control/issues/new?labels=enhancement">Feature Request</a>
 </p>
 </div>
+<br>
 
-# About Controllify
-
----
+## About Controllify
 
 Govee lights are known for being competitively-priced smart lights with loads of features.
 However, their official mobile app leaves a lot to be desired, and generally feels a bit clunky to use.
@@ -37,10 +36,9 @@ Thanks to Govee making their public API much more usable recently,
 Controllify seeks to fill the feature void left by the official desktop and mobile apps, all while being accessible from
 anywhere you could use the official app.
 <br>
+<br>
 
-# What Controllify Is
-
----
+## What Controllify Is
 
 Controllify is meant to fill the feature void in three areas:
 
@@ -87,20 +85,20 @@ Even better, for custom presets, all actions can be sent as a single request to 
 will handle the rest and split each request up for Govee to accept.
 No longer will you have to create a long list of web requests in some external software just to get your lights looking
 the way you want them. Send a single request to Controllify to simplify the process. Do more, faster.
+<br>
+<br>
 
-# What Controllify Isn't
-
----
+## What Controllify Isn't
 
 Controllify is not a replacement for all the functionality of the official Govee apps. Creating device DIY lighting
 presets in the official app works well enough to not need a replacement.
 With the constant addition of new devices to the Govee ecosystem, it is far better to leave the creation of lighting
 presets to them.
 <br>
+<br>
 
-# Requirements
+## Requirements
 
----
 You will need a Govee API key in order to use Controllify. If you don't have one, you can apply for a key inside the
 official Govee Home app on Android or iOS.
 [Click here for instructions/more info.](https://govee.readme.io/reference/applying-for-an-api-key)
@@ -110,10 +108,9 @@ official Govee Home app on Android or iOS.
 > The API Keys are sent to your registered email. Keep this API Key safe.
 > If you suspect your API Key is compromised, apply for a new API Key, and a new API Key will be emailed to you,
 > and your previous key will be deleted.
+<br>
 
-# Roadmap
-
----
+## Roadmap
 
 As Controllify is still in its early stages, my roadmap for potential features is slim. However, as things are requested
 and approved to be added, they will be added here.
@@ -127,10 +124,9 @@ and approved to be added, they will be added here.
 - [ ] Display internal API call limit from Govee to users
 - [ ] User Accounts
 - [ ] Secondary Users / API sub-keys (let allowed users control your lights)
+<br>
 
-# Contact
-
----
+## Contact
 
 If you have a feature suggestion or need some other means of contacting me, feel free to reach out through
 
