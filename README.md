@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
 <br/>
 <div align="center">
-<a href="https://github.com/GamerBah/govee-control">
+<a href="https://gamerbah.com/govee">
 <img src="https://gamerbah.com/govee/Banner.png" alt="Logo" width="auto" height="100">
 </a>
 <h3 align="center">Controllify for Govee</h2>
