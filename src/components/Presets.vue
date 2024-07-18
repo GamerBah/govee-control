@@ -1,8 +1,7 @@
 <template>
   <v-container>
     <div class="d-flex align-baseline">
-      <v-btn class="mb-5"
-             variant="elevated" elevation="7" block @click="openPresetDialog(true)"
+      <v-btn class="mb-5" variant="elevated" elevation="7" block @click="openPresetDialog(true)"
              size="large"
              color="secondary"
              rounded="lg"
@@ -13,7 +12,7 @@
     <div class="d-flex flex-wrap">
       <template v-if="presets.length">
         <v-row align="center">
-          <v-col v-for="(preset, index) in presets" :key="preset.name" cols="4" xl="3">
+          <v-col v-for="(preset, index) in presets" :key="preset.name" cols="12" xl="3" md="4" sm="6">
             <v-card @click="editPreset(preset, index)"
                     class="card mx-auto my-auto"
                     rounded="lg"
@@ -25,7 +24,8 @@
               </template>
               <template v-slot:append>
                 <v-btn class="position-absolute"
-                       style="top: 20%; right: 20px" @click.stop="$emit('playPreset', generateJSON(preset))"
+                       style="top: 20%; right: 20px"
+                       @click.stop="$emit('playPreset', generateJSON(preset))"
                        variant="elevated"
                        color="green"
                        icon>
@@ -48,41 +48,52 @@
       </template>
     </div>
 
-    <v-dialog persistent v-model="dialogPreset" max-width="60rem">
-      <v-card rounded="xl" color="background">
+    <v-dialog :fullscreen="$vuetify.display.smAndDown"
+              :transition="$vuetify.display.smAndDown ? 'dialog-bottom-transition' : 'slide-y-reverse-transition'"
+              persistent
+              scrollable
+              v-model="dialogPreset"
+              max-width="60rem">
+      <v-card :rounded="$vuetify.display.smAndDown ? 0 : 'xl'" color="background">
         <template v-slot:title>
           <v-row class="d-flex align-center">
             <v-col cols="5">
               <span>{{ presetCardTitle }}</span>
             </v-col>
-            <v-col cols="3" v-if="!newPreset">
-              <v-btn @click="generateJSON(currentPreset)"
-                     prepend-icon="mdi-content-copy"
-                     variant="plain"
-                     color="white"
-                     rounded="lg">
-                Copy JSON
-              </v-btn>
-            </v-col>
-            <v-col cols="3" v-if="!newPreset">
-              <v-btn @click="openJsonDialog(currentPreset)"
-                     prepend-icon="mdi-eye"
-                     variant="plain"
-                     color="white"
-                     rounded="lg">
-                View JSON
-              </v-btn>
-            </v-col>
           </v-row>
         </template>
         <template v-slot:append v-if="!newPreset">
-          <v-btn @click="dialogDelete = true" variant="plain" density="default" color="red" icon>
-            <v-icon>mdi-trash-can</v-icon>
+          <v-btn color="red" :variant="$vuetify.display.xs ? 'tonal' : 'plain'" @click="dialogPreset = false;" icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </template>
         <v-divider/>
         <v-card-text>
           <v-container>
+            <v-row class="mb-5">
+              <v-col cols="12" md="6" v-if="!newPreset">
+                <v-btn @click="generateJSON(currentPreset)"
+                       prepend-icon="mdi-content-copy"
+                       variant="tonal"
+                       color="white"
+                       size="large"
+                       rounded="lg"
+                       block>
+                  Copy JSON
+                </v-btn>
+              </v-col>
+              <v-col cols="6" v-if="!newPreset && !$vuetify.display.smAndDown">
+                <v-btn @click="openJsonDialog(currentPreset)"
+                       prepend-icon="mdi-eye"
+                       variant="tonal"
+                       color="white"
+                       size="large"
+                       rounded="lg"
+                       block>
+                  View JSON
+                </v-btn>
+              </v-col>
+            </v-row>
             <h2>Preset Name</h2>
             <v-row class="d-flex align-center my-2">
               <v-col>
@@ -93,14 +104,16 @@
                               variant="solo-filled"
                               color="accent"
                               validate-on="input"
-                              :rules="[nameRules.unique, nameRules.required]"
-                              v-model="currentPreset.name"></v-text-field>
+                              :rules="[nameRules.unique, nameRules.counter, nameRules.required]"
+                              v-model="currentPreset.name"
+                              counter
+                              maxlength="30"></v-text-field>
               </v-col>
             </v-row>
             <v-divider/>
             <h2 class="mt-5">Lighting Modes</h2>
             <v-row class="d-flex align-center my-2">
-              <v-col v-for="device in devices" :key="device.name" cols="4">
+              <v-col v-for="device in devices" :key="device.name" cols="12" md="4" sm="6">
                 <v-card class="card mx-auto my-auto" rounded="lg" variant="elevated" color="primary" elevation="7">
                   <template v-slot:title>
                     <span class="text-body-1">{{ device.deviceName }}</span>
@@ -131,34 +144,45 @@
                 </v-card>
               </v-col>
             </v-row>
-            <v-card-actions class="mt-10">
-              <v-row class="d-flex align-center text-center" no-gutters>
-                <v-col>
-                  <v-btn @click="resetPresetDialog"
-                         block
-                         prepend-icon="mdi-cancel"
-                         variant="elevated"
-                         color="secondary"
-                         size="large"
-                         rounded="lg">Cancel
-                  </v-btn>
-                </v-col>
-                <v-spacer/>
-                <v-col>
-                  <v-btn @click="saveOrUpdatePreset"
-                         block
-                         prepend-icon="mdi-floppy"
-                         variant="elevated"
-                         color="green"
-                         rounded="lg"
-                         size="large"
-                         :disabled="!validatePreset">Save
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-actions>
+            <v-divider class="d-flex d-sm-none mt-5"/>
+            <v-btn @click="dialogDelete = true"
+                   class="d-flex d-sm-none mt-8"
+                   block
+                   prepend-icon="mdi-trash-can"
+                   variant="elevated"
+                   color="red"
+                   size="large"
+                   rounded="lg">Delete Preset
+            </v-btn>
           </v-container>
         </v-card-text>
+        <v-card-actions>
+          <v-container>
+            <v-row class="d-flex">
+              <v-col v-if="!$vuetify.display.xs">
+                <v-btn @click="dialogDelete = true"
+                       block
+                       prepend-icon="mdi-trash-can"
+                       variant="elevated"
+                       color="red"
+                       size="large"
+                       rounded="lg">Delete
+                </v-btn>
+              </v-col>
+              <v-col>
+                <v-btn @click="saveOrUpdatePreset"
+                       block
+                       prepend-icon="mdi-floppy"
+                       variant="elevated"
+                       color="green"
+                       rounded="lg"
+                       size="large"
+                       :disabled="validatePreset">Save
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -173,11 +197,23 @@
               <v-col cols="2">
                 <v-icon color="yellow" size="x-large">mdi-alert-rhombus</v-icon>
               </v-col>
-              <v-col>
-                <v-btn @click="dialogDelete = false" color="red" block variant="elevated" rounded="lg" text="No"/>
+              <v-col cols="12" sm="6">
+                <v-btn @click="dialogDelete = false"
+                       color="red"
+                       block
+                       variant="elevated"
+                       rounded="lg"
+                       size="large"
+                       text="No"/>
               </v-col>
               <v-col>
-                <v-btn @click="deletePreset" color="green" block variant="elevated" rounded="lg" text="Yes"/>
+                <v-btn @click="deletePreset"
+                       color="green"
+                       block
+                       variant="elevated"
+                       rounded="lg"
+                       size="large"
+                       text="Yes"/>
               </v-col>
             </v-row>
           </v-container>
@@ -269,10 +305,10 @@ export default {
   emits: ["savePreset", "updatePreset", "deletePreset", "playPreset"],
   computed: {
     validatePreset() {
-      return this.currentPreset.name !== null
-          && this.currentPreset.name !== ""
-          && this.currentPreset.actions !== 0
-          && this.presets.find(preset => preset.name === this.currentPreset.name) === undefined
+      return this.currentPreset.name === null
+          || this.currentPreset.name === ""
+          || this.currentPreset.actions === 0
+          || this.presets.find(preset => preset.name === this.currentPreset.name) !== undefined
           || this.currentPreset.name === this.oldName;
     },
     presetCardTitle() {
@@ -294,8 +330,9 @@ export default {
       newPreset: false,
       diyValues: {},
       nameRules: {
-        required: value => !!value || "Required",
-        unique: value => (this.presets.find(preset => preset.name === value) === undefined || value === this.oldName) || "Name already in use",
+        required: value => !!value || "Name is required.",
+        counter: value => value.length <= 30 || "Maximum length of 30 characters",
+        unique: value => this.presets.find(preset => preset.name === value) === undefined || "A preset with this name already exists.",
       },
       json: null,
     };

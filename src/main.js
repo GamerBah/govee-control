@@ -34,7 +34,8 @@ const vuetify = createVuetify({
                     accent: "#FFE747",
                     background: colors.grey.darken4,
                     disconnected: "#2D1C20",
-                    white: colors.grey.lighten5
+                    white: colors.grey.lighten5,
+                    lightGray: colors.grey.darken3,
                 }
             },
         },

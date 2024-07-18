@@ -8,6 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import axios from "axios";
 
 const demo = false;
+const requestUrl = process.env.NODE_ENV === "development" ? "https://gamerbah.com/govee/request.php" : requestUrl;
 
 const theme = useTheme();
 
@@ -168,7 +169,7 @@ async function refreshDevices() {
   } else {
     try {
       const response = await axios({
-        url: "./request.php",
+        url: requestUrl,
         method: Http.GET,
         params: {"api_key": apiKey.value, "url": "https://openapi.api.govee.com/router/api/v1/user/devices"},
         headers: {"Content-Type": "application/json"},
@@ -278,7 +279,7 @@ async function setDeviceStates(apiKey, device) {
 
 async function httpRequest(apiKey, method, data) {
   return axios({
-    url: "./request.php",
+    url: requestUrl,
     method: method,
     params: {"api_key": apiKey},
     headers: {"Content-Type": "application/json"},
@@ -307,7 +308,7 @@ function deviceHasDiy(capabilities) {
 async function postDeviceIfHasDiy(deviceObj) {
   if (deviceHasDiy(deviceObj.capabilities)) {
     const obj = {
-      php: "./request.php",
+      php: requestUrl,
       apiKey: apiKey.value,
       deviceObj: deviceObj,
       url: "https://openapi.api.govee.com/router/api/v1/device/diy-scenes"
