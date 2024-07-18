@@ -5,7 +5,9 @@
              variant="elevated"
              elevation="7"
              color="secondary"
-             rounded="lg" :block="$vuetify.display.xs" :size="$vuetify.display.xs ? 'large' : 'default'"
+             rounded="lg"
+             :block="$vuetify.display.xs"
+             :size="$vuetify.display.xs ? 'large' : 'default'"
              @click="$emit('refresh')"
              prepend-icon="mdi-refresh"
              :loading="refreshing">
@@ -182,8 +184,7 @@
                           <span class="mr-3 text-body-2">{{ diy.name }}</span>
                         </template>
                         <template v-slot:append>
-                          <v-btn class="d-none d-sm-flex"
-                                 @click.stop="copyJSON(generateJSON(device, capabilities.DIY, diy.value))"
+                          <v-btn @click.stop="copyJSON(generateJSON(device, capabilities.DIY, diy.value))"
                                  :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
                                  color="default"
                                  size="small"
@@ -193,7 +194,8 @@
                               Copy Request Body
                             </v-tooltip>
                           </v-btn>
-                          <v-btn @click.stop="openJSONDialog(device, capabilities.DIY, diy, diy.value)"
+                          <v-btn class="d-none d-sm-flex"
+                                 @click.stop="openJSONDialog(device, capabilities.DIY, diy, diy.value)"
                                  :variant="$vuetify.display.xs ? 'tonal' : 'plain'"
                                  color="default"
                                  size="small"
