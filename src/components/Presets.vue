@@ -62,7 +62,7 @@
             </v-col>
           </v-row>
         </template>
-        <template v-slot:append v-if="!newPreset">
+        <template v-slot:append v-if="!newPreset || (newPreset && $vuetify.display.xs)">
           <v-btn color="red" :variant="$vuetify.display.xs ? 'tonal' : 'plain'" @click="dialogPreset = false;" icon>
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -145,7 +145,7 @@
               </v-col>
             </v-row>
             <v-divider class="d-flex d-sm-none mt-5"/>
-            <v-btn @click="dialogDelete = true"
+            <v-btn v-if="!newPreset" @click="dialogDelete = true"
                    class="d-flex d-sm-none mt-8"
                    block
                    prepend-icon="mdi-trash-can"
@@ -160,13 +160,22 @@
           <v-container>
             <v-row class="d-flex">
               <v-col v-if="!$vuetify.display.xs">
-                <v-btn @click="dialogDelete = true"
+                <v-btn v-if="!newPreset" @click="dialogDelete = true"
                        block
                        prepend-icon="mdi-trash-can"
                        variant="elevated"
                        color="red"
                        size="large"
                        rounded="lg">Delete
+                </v-btn>
+                <v-btn v-else
+                       @click="dialogPreset = false"
+                       block
+                       prepend-icon="mdi-trash-can"
+                       variant="elevated"
+                       color="lightGray"
+                       size="large"
+                       rounded="lg">Cancel
                 </v-btn>
               </v-col>
               <v-col>

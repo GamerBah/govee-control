@@ -104,7 +104,7 @@ official Govee Home app on Android or iOS.
 [Click here for instructions/more info.](https://govee.readme.io/reference/applying-for-an-api-key)
 
 *A note from Govee's site:*
-> Govee only supports one API Key per user tied to your Gove Home account.
+> Govee only supports one API Key per user tied to your Govee Home account.
 > The API Keys are sent to your registered email. Keep this API Key safe.
 > If you suspect your API Key is compromised, apply for a new API Key, and a new API Key will be emailed to you,
 > and your previous key will be deleted.
@@ -116,7 +116,7 @@ As Controllify is still in its early stages, my roadmap for potential features i
 and approved to be added, they will be added here.
 
 - [ ] Improve mobile user experience
-- [ ] Allow for device power, color temp, and brightness states in custom presets
+- [ ] Overhaul Custom Presets to use customizable timed action lists rather than set action dropdowns
 - [ ] Improve new user experience
 - [ ] Color Palette tweaks
 - [ ] Auto refresh of potentially stale data

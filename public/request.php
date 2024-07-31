@@ -11,15 +11,13 @@ function createResponse($success, $message): array
     return ['success' => $success, 'message' => $message];
 }
 
-/**
- * @throws Exception
- */
 function getApiKeyFromGetRequest()
 {
-    if (isset($_GET['api_key'])) {
+    if (!empty($_GET['api_key'])) {
         return $_GET['api_key'];
     } else {
-        throw new Exception("'Govee-API-Key' is not set in POST request.");
+        echo json_encode(['error' => 'No Govee API key is present in the request']);
+        exit;
     }
 }
 
@@ -95,13 +93,7 @@ function executePostRequest($apiKey, $actions): array
 }
 
 setHeaders();
-try {
-    $goveeKey = getApiKeyFromGetRequest();
-} catch (Exception $e) {
-    print_r(json_encode(createResponse(false, $e->getMessage())));
-    exit;
-}
-
+$goveeKey = getApiKeyFromGetRequest();
 $bodyJson = getPostRequestBody();
 $actions = json_decode($bodyJson, true);
 

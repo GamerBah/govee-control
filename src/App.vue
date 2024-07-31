@@ -8,7 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import axios from "axios";
 
 const demo = false;
-const requestUrl = process.env.NODE_ENV === "development" ? "https://gamerbah.com/govee/request.php" : requestUrl;
+const requestUrl = process.env.NODE_ENV === "development" ? "https://gamerbah.com/govee/request.php" : "./request.php";
 
 const theme = useTheme();
 
@@ -98,6 +98,7 @@ function submitKey() {
   } else {
     document.cookie = "Govee-API-Key=" + apiKey.value;
   }
+  console.log(refreshDevices());
 }
 
 function showSnackbar(text) {
@@ -125,7 +126,7 @@ onMounted(() => {
     presets.value = JSON.parse(localStorage.getItem("presets")) ?? [];
 
     let deviceStorage = localStorage.getItem("devices");
-    if (deviceStorage !== undefined && deviceStorage !== null && deviceStorage !== "[]" && !demo) {
+    if (apiKey.value && deviceStorage && deviceStorage !== "[]" && !demo) {
       devices.value = JSON.parse(localStorage.getItem("devices"));
       for (const value of devices.value) {
         value.states[DeviceState.ONLINE] = null;
@@ -136,7 +137,7 @@ onMounted(() => {
       });
       storageSuccess.value = true;
     } else {
-      if (apiKey.value !== null) {
+      if (apiKey.value) {
         refreshDevices().then(() => apiSuccess.value = true);
       } else {
         noKey.value = true;
@@ -144,7 +145,7 @@ onMounted(() => {
     }
   } else {
     apiKey.value = getCookie("Govee-API-Key");
-    if (apiKey.value !== null || apiKey.value !== "") {
+    if (apiKey.value) {
       refreshDevices();
     } else {
       noKey.value = true;
@@ -168,10 +169,12 @@ async function refreshDevices() {
     });
   } else {
     try {
+      let key = apiKey.value;
+      if (!key) key = null;
       const response = await axios({
         url: requestUrl,
         method: Http.GET,
-        params: {"api_key": apiKey.value, "url": "https://openapi.api.govee.com/router/api/v1/user/devices"},
+        params: {"api_key": key, "url": "https://openapi.api.govee.com/router/api/v1/user/devices"},
         headers: {"Content-Type": "application/json"},
         data: {},
       });
@@ -199,6 +202,8 @@ async function refreshDevices() {
 
       devices.value = await Promise.all(devicePromises);
       devices.value.sort((a, b) => a.sku.localeCompare(b.sku));
+
+      return response;
     } catch (error) {
       console.log("Error:", error);
     } finally {
@@ -472,13 +477,24 @@ async function playPreset(json) {
           </v-tabs-window-item>
           <v-tabs-window-item key="presets" value="presets">
             <Presets @save-preset="savePreset"
-                     @delete-preset="deletePreset"
-                     @update-preset="updatePreset" @play-preset="playPreset"
+                     @delete-preset="deletePreset" @update-preset="updatePreset" @play-preset="playPreset"
                      :devices="devices"
                      :presets="presets"
                      :show-advanced-info="showAdvancedInfo"/>
           </v-tabs-window-item>
         </v-tabs-window>
+        <v-hover>
+          <template v-slot:default="{ isHovering, props }">
+            <v-alert v-if="!apiKey"
+                     rounded="lg"
+                     v-bind="props"
+                     :variant="isHovering ? 'elevated' : 'tonal'"
+                     title="Invalid API Key"
+                     text="In order to use Controllify, you must obtain an API key from the Govee Home mobile app. Click to open the settings page for more info."
+                     type="error"
+                     @click="settings = true"/>
+          </template>
+        </v-hover>
       </v-container>
     </v-main>
 
@@ -501,7 +517,8 @@ async function playPreset(json) {
               max-width="60em"
               v-on:close="showKey = false"
               :fullscreen="$vuetify.display.smAndDown"
-              :transition="$vuetify.display.smAndDown ? 'dialog-bottom-transition' : 'slide-y-reverse-transition'">
+              :transition="$vuetify.display.smAndDown ? 'dialog-bottom-transition' : 'slide-y-reverse-transition'"
+              @afterLeave="noKey = !apiKey">
       <v-card prepend-icon="mdi-cog" title="Settings" :rounded="$vuetify.display.smAndDown ? 0 : 'xl'">
         <template v-slot:append>
           <v-btn variant="plain" color="red" icon @click="settings = false">
